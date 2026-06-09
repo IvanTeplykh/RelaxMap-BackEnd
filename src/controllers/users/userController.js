@@ -62,7 +62,7 @@ export const getUserLocations = async (req, res) => {
 
     return {
       ...locationObject,
-      rate: Number(averageRate.toFixed(1)),
+      rating: Number(averageRate.toFixed(1)),
     };
   });
 
@@ -73,6 +73,6 @@ export const getUserLocations = async (req, res) => {
     perPage: Number(perPage),
     totalLocations,
     totalPages,
-    locations,
+    locations: locationsWithAverageRate,
   });
 };

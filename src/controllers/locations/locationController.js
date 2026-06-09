@@ -21,7 +21,7 @@ const calculateAverageRate = (feedbacks, fallbackRate = 0) => {
 
   const averageRate = ratesCount ? totalRate / ratesCount : fallbackRate;
 
-  return Number(averageRate.toFixed(1));
+  return Math.round(averageRate * 2) / 2;
 };
 
 const getFeedbackId = (feedback) => feedback?._id || feedback;

@@ -62,7 +62,7 @@ export const getUserLocations = async (req, res) => {
 
     return {
       ...locationObject,
-      rating: Number(averageRate.toFixed(1)),
+      rate: Number(averageRate.toFixed(1)),
     };
   });
 

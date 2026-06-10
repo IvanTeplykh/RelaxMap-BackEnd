@@ -14,7 +14,7 @@ import { authenticate } from "../middleware/authenticate.js";
 
 const router = Router();
 
-router.post("/signup", celebrate(registerUserSchema), registerUser);
+router.post("/register", celebrate(registerUserSchema), registerUser);
 router.post("/login", celebrate(loginUserSchema), loginUser);
 router.post("/refresh", authenticate, refreshUserSession);
 router.post("/logout", authenticate, logoutUser);

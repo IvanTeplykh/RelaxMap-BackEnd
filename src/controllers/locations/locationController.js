@@ -26,7 +26,11 @@ const calculateAverageRate = (feedbacks, fallbackRate = 0) => {
 
 const getFeedbackId = (feedback) => feedback?._id || feedback;
 
-const getLocationWithAverageRate = (location, fallbackToStoredRate = true) => {
+const getLocationWithAverageRate = (
+  location,
+  fallbackToStoredRate = true,
+  keepFeedbackIdsOnly = false,
+) => {
   const locationObject = location.toObject();
   const feedbacks = locationObject.feedbacksId || [];
   const fallbackRate = fallbackToStoredRate ? locationObject.rate || 0 : 0;
@@ -34,6 +38,10 @@ const getLocationWithAverageRate = (location, fallbackToStoredRate = true) => {
     ...locationObject,
     rate: calculateAverageRate(feedbacks, fallbackRate),
   };
+
+  if (keepFeedbackIdsOnly) {
+    locationWithAverageRate.feedbacksId = feedbacks.map(getFeedbackId);
+  }
 
   return locationWithAverageRate;
 };
@@ -101,7 +109,7 @@ export const getLocations = async (req, res) => {
 
   const [totalLocations, locations] = await Promise.all([
     LocationModel.countDocuments(filter),
-    LocationModel.find(filter).populate("feedbacksId"),
+    LocationModel.find(filter).populate("feedbacksId", "rate"),
   ]);
 
   const locationsWithAverageRate = getLocationsSortedByPopularity(

@@ -130,16 +130,14 @@ export const getLocations = async (req, res) => {
 export const getLocationById = async (req, res) => {
   const { locationId } = req.params;
 
-  const location = await LocationModel.findById(locationId).populate(
-    "feedbacksId",
-    "rate",
-  );
+  const location =
+    await LocationModel.findById(locationId).populate("feedbacksId");
 
   if (!location) {
     throw createHttpError(404, "Location not found");
   }
 
-  res.status(200).json(getLocationWithAverageRate(location, false, true));
+  res.status(200).json(getLocationWithAverageRate(location, false));
 };
 
 export const createLocation = async (req, res) => {

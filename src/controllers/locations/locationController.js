@@ -109,7 +109,10 @@ export const getLocations = async (req, res) => {
 
   const [totalLocations, locations] = await Promise.all([
     LocationModel.countDocuments(filter),
-    LocationModel.find(filter).populate("feedbacksId", "rate"),
+    LocationModel.find(filter)
+      .populate("feedbacksId", "rate")
+      .populate("regionInfo")
+      .populate("locationTypeInfo"),
   ]);
 
   const locationsWithAverageRate = getLocationsSortedByPopularity(
@@ -129,17 +132,17 @@ export const getLocations = async (req, res) => {
 
 export const getLocationById = async (req, res) => {
   const { locationId } = req.params;
-
-  const location = await LocationModel.findById(locationId).populate(
-    "feedbacksId",
-    "rate",
-  );
+  const location = await LocationModel.findById(locationId)
+    .populate("feedbacksId")
+    .populate("ownerId", "name")
+    .populate("regionInfo")
+    .populate("locationTypeInfo");
 
   if (!location) {
     throw createHttpError(404, "Location not found");
   }
 
-  res.status(200).json(getLocationWithAverageRate(location, false, true));
+  res.status(200).json(getLocationWithAverageRate(location, false));
 };
 
 export const createLocation = async (req, res) => {

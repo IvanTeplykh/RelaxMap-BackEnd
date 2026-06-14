@@ -90,7 +90,14 @@ const getLocationsSortedByPopularity = (locations) =>
     .map(({ location }) => location);
 
 export const getLocations = async (req, res) => {
-  const { page = 1, limit = 10, region, locationType, search } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    region,
+    locationType,
+    search,
+    sort,
+  } = req.query;
   const skip = (page - 1) * limit;
 
   const filter = {};
@@ -100,11 +107,20 @@ export const getLocations = async (req, res) => {
   }
 
   if (locationType) {
-    filter.locationType = locationType;
+    const locationTypes = locationType
+      .split(",")
+      .map((type) => type.trim())
+      .filter(Boolean);
+
+    if (locationTypes.length > 0) {
+      filter.locationType = {
+        $in: locationTypes,
+      };
+    }
   }
 
   if (search) {
-    filter.$text = { $search: search };
+    filter.name = { $regex: search, $options: "i" };
   }
 
   const [totalLocations, locations] = await Promise.all([
@@ -115,9 +131,24 @@ export const getLocations = async (req, res) => {
       .populate("locationTypeInfo"),
   ]);
 
-  const locationsWithAverageRate = getLocationsSortedByPopularity(
-    locations,
-  ).slice(skip, skip + Number(limit));
+  let sortedLocations;
+
+  if (sort === "rating") {
+    sortedLocations = locations
+      .map((location) => getLocationWithAverageRate(location))
+      .sort((a, b) => b.rate - a.rate);
+  } else if (sort === "newest") {
+    sortedLocations = locations
+      .map((location) => getLocationWithAverageRate(location))
+      .sort((a, b) => getLocationTimestamp(b) - getLocationTimestamp(a));
+  } else {
+    sortedLocations = getLocationsSortedByPopularity(locations);
+  }
+
+  const locationsWithAverageRate = sortedLocations.slice(
+    skip,
+    skip + Number(limit),
+  );
 
   const totalPages = Math.ceil(totalLocations / limit);
 

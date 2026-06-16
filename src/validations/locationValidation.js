@@ -5,6 +5,11 @@ const objectIdValidator = (value, helpers) => {
   return !isValidObjectId(value) ? helpers.message("Invalid id format") : value;
 };
 
+const coordinatesSchema = Joi.object({
+  lat: Joi.number().min(-90).max(90).required(),
+  lon: Joi.number().min(-180).max(180).required(),
+});
+
 export const getAllLocationsSchema = {
   [Segments.QUERY]: Joi.object({
     page: Joi.number().integer().min(1).default(1),
@@ -28,6 +33,7 @@ export const createLocationSchema = {
     locationType: Joi.string().max(64).required(),
     region: Joi.string().max(64).required(),
     description: Joi.string().trim().min(20).max(6000).required(),
+    coordinates: coordinatesSchema.required(),
   }),
 };
 
@@ -40,5 +46,6 @@ export const updateLocationSchema = {
     locationType: Joi.string().max(64),
     region: Joi.string().max(64),
     description: Joi.string().trim().min(20).max(6000),
+    coordinates: coordinatesSchema,
   }),
 };

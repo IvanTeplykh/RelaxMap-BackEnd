@@ -32,8 +32,7 @@ export const createLocationSchema = {
     name: Joi.string().min(3).max(96).required(),
     locationType: Joi.string().max(64).required(),
     region: Joi.string().max(64).required(),
-    description: Joi.string().min(20).max(6000).required(),
-    coordinates: coordinatesSchema.required(),
+    description: Joi.string().trim().min(20).max(6000).required(),
   }),
 };
 
@@ -45,7 +44,6 @@ export const updateLocationSchema = {
     name: Joi.string().min(3).max(96),
     locationType: Joi.string().max(64),
     region: Joi.string().max(64),
-    description: Joi.string().min(20).max(6000),
-    coordinates: coordinatesSchema.required(),
+    description: Joi.string().trim().min(20).max(6000),
   }),
 };

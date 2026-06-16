@@ -46,6 +46,6 @@ export const updateLocationSchema = {
     locationType: Joi.string().max(64),
     region: Joi.string().max(64),
     description: Joi.string().trim().min(20).max(6000),
-    coordinates: coordinatesSchema.required(),
+    coordinates: coordinatesSchema,
   }),
 };

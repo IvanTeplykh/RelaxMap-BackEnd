@@ -1,6 +1,8 @@
 import createHttpError from "http-errors";
 import { LocationModel } from "../../models/location.js";
 import { saveLocationImageToCloudinary } from "../../utils/saveFileToCloudinary.js";
+import { RegionModel } from "../../models/region.js";
+import { LocationTypeModel } from "../../models/locationType.js";
 
 const getLocationTimestamp = (location) => {
   const time = new Date(location.createdAt || 0).getTime();
@@ -120,7 +122,31 @@ export const getLocations = async (req, res) => {
   }
 
   if (search) {
-    filter.name = { $regex: search, $options: "i" };
+    const searchRegex = new RegExp(search.trim(), "i");
+
+    const [matchedRegions, matchedLocationTypes] = await Promise.all([
+      RegionModel.find({
+        $or: [
+          { region: searchRegex },
+          { name: searchRegex },
+          { type: searchRegex },
+          { slug: searchRegex },
+        ],
+      }).select("slug"),
+
+      LocationTypeModel.find({
+        $or: [{ type: searchRegex }, { slug: searchRegex }],
+      }).select("slug"),
+    ]);
+
+    const regionSlugs = matchedRegions.map((item) => item.slug);
+    const locationTypeSlugs = matchedLocationTypes.map((item) => item.slug);
+
+    filter.$or = [
+      { name: searchRegex },
+      { region: { $in: regionSlugs } },
+      { locationType: { $in: locationTypeSlugs } },
+    ];
   }
 
   const [totalLocations, locations] = await Promise.all([
